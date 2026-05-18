@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Saved Issues</h1>
+
+{% if issues %}
+    {% for issue in issues %}
+        <div class="card">
+            <h3>{{ issue.full_name }}</h3>
+
+            <p>
+                <strong>#{{ issue.issue_number }} - {{ issue.title }}</strong>
+            </p>
+
+            <p><strong>Labels:</strong> {{ issue.labels or "No labels" }}</p>
+            <p><strong>Note:</strong> {{ issue.note }}</p>
+            <p><strong>Priority:</strong> {{ issue.priority or "Medium" }}</p>
+            <p><strong>Target Date:</strong> {{ issue.target_date or "Not set" }}</p>
+
+            <form method="POST" action="/update-status" style="margin: 15px 0;">
+                <input type="hidden" name="issue_id" value="{{ issue.id }}">
+
+                <label><strong>Status:</strong></label>
+                <select name="status">
+                    <option value="Planned"
+                        {% if issue.status == "Planned" %}selected{% endif %}>
+                        Planned
+                    </option>
+
+                    <option value="In Progress"
+                        {% if issue.status == "In Progress" %}selected{% endif %}>
+                        In Progress
+                    </option>
+
+                    <option value="Completed"
+                        {% if issue.status == "Completed" %}selected{% endif %}>
+                        Completed
+                    </option>
+
+                    <option value="Blocked"
+                        {% if issue.status == "Blocked" %}selected{% endif %}>
+                        Blocked
+                    </option>
+                </select>
+
+                <button class="btn" type="submit">Update Status</button>
+            </form>
+
+            <a href="{{ issue.issue_url }}" target="_blank">View on GitHub</a>
+
+            <form method="POST" action="/delete-issue" style="margin-top: 15px;">
+                <input type="hidden" name="issue_id" value="{{ issue.id }}">
+                <button class="btn btn-danger" type="submit">Delete Issue</button>
+            </form>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="card">
+        <p>No saved issues yet.</p>
+    </div>
+{% endif %}
+
+{% endblock %}

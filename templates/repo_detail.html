@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ repo.full_name }}</h1>
+
+<div class="card">
+    <p>{{ repo.description or "No description" }}</p>
+
+    <p>
+        ⭐ Stars: {{ repo.stars }} |
+        Language: {{ repo.language or "Not detected" }} |
+        Open Issues: {{ repo.open_issues }}
+    </p>
+
+    <a href="{{ repo.github_url }}" target="_blank">View Repository on GitHub</a>
+</div>
+
+<h2>Open Issues</h2>
+
+{% if issues %}
+    {% for issue in issues %}
+        <div class="card">
+            <h3>#{{ issue.issue_number }} - {{ issue.title }}</h3>
+
+            <p>Author: {{ issue.author }}</p>
+            <p>Labels: {{ issue.labels or "No labels" }}</p>
+
+            <a href="{{ issue.issue_url }}" target="_blank">View Issue</a>
+
+            <form method="POST" action="/save-issue">
+    <input type="hidden" name="repo_id" value="{{ repo.id }}">
+    <input type="hidden" name="issue_number" value="{{ issue.issue_number }}">
+    <input type="hidden" name="title" value="{{ issue.title }}">
+    <input type="hidden" name="issue_url" value="{{ issue.issue_url }}">
+    <input type="hidden" name="labels" value="{{ issue.labels }}">
+
+    <label>Note:</label>
+    <input type="text" name="note" placeholder="Why do you want to save this issue?" required>
+
+    <label>Priority:</label>
+    <select name="priority" required>
+        <option value="Low">Low</option>
+        <option value="Medium" selected>Medium</option>
+        <option value="High">High</option>
+    </select>
+
+    <label>Target Date:</label>
+    <input type="date" name="target_date">
+
+    <button class="btn" type="submit">Save Issue</button>
+</form>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="card">
+        <p>No open issues found.</p>
+    </div>
+{% endif %}
+{% endblock %}
