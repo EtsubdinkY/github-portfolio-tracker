@@ -25,6 +25,7 @@ app.secret_key = "dev-secret-key"
 @app.route("/")
 def home():
     user_id = session.get("user_id")
+    print("SESSION USER ID:", user_id)
 
     if user_id:
         conn = get_db_connection()
@@ -32,10 +33,13 @@ def home():
             "SELECT * FROM repositories WHERE user_id = ?",
             (user_id,)
         ).fetchall()
-        conn.close()
 
+        print("REPOS FOUND:", [dict(repo) for repo in repos])
+
+        conn.close()
         stats = get_dashboard_stats(user_id)
     else:
+        print("NO USER LOGGED IN")
         repos = []
         stats = {
             "total_repos": 0,
@@ -50,6 +54,7 @@ def home():
 @app.route("/add", methods=["GET", "POST"])
 def add_repo():
     user_id = session.get("user_id")
+    print("ADD PAGE SESSION USER ID:", user_id)
 
     if not user_id:
         flash("Please login with GitHub first.")
@@ -59,13 +64,29 @@ def add_repo():
         owner = request.form.get("owner")
         repo_name = request.form.get("repo_name")
 
+        print("OWNER:", owner)
+        print("REPO NAME:", repo_name)
+        print("USER ID WHILE ADDING:", user_id)
+
         repo = get_repository(owner, repo_name)
+        print("REPO FROM GITHUB:", repo)
 
         if repo:
             save_repository(repo, user_id)
+            print("REPOSITORY SAVED FOR USER:", user_id)
+
+            conn = get_db_connection()
+            saved_repos = conn.execute(
+                "SELECT id, user_id, full_name FROM repositories WHERE user_id = ?",
+                (user_id,)
+            ).fetchall()
+            print("SAVED REPOS AFTER INSERT:", [dict(row) for row in saved_repos])
+            conn.close()
+
             flash("Repository added successfully!")
             return redirect(url_for("home"))
         else:
+            print("REPOSITORY NOT FOUND FROM GITHUB API")
             flash("Repository not found.")
 
     return render_template("add_repo.html")
@@ -191,6 +212,7 @@ def login():
 @app.route("/github/callback")
 def github_callback():
     code = request.args.get("code")
+    print("GITHUB CALLBACK CODE:", code)
 
     token_response = requests.post(
         "https://github.com/login/oauth/access_token",
@@ -205,6 +227,8 @@ def github_callback():
     token_data = token_response.json()
     access_token = token_data.get("access_token")
 
+    print("TOKEN RECEIVED:", bool(access_token))
+
     if not access_token:
         flash("GitHub login failed.")
         return redirect(url_for("home"))
@@ -218,6 +242,7 @@ def github_callback():
     )
 
     github_user = user_response.json()
+    print("GITHUB USER:", github_user)
 
     user = get_or_create_user(
         str(github_user.get("id")),
@@ -225,9 +250,13 @@ def github_callback():
         github_user.get("avatar_url")
     )
 
+    print("LOCAL DB USER:", dict(user))
+
     session["user_id"] = user["id"]
     session["github_username"] = user["username"]
     session["github_avatar"] = user["avatar_url"]
+
+    print("SESSION SET USER ID:", session["user_id"])
 
     return redirect(url_for("home"))
 
