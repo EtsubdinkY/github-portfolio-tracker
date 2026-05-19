@@ -62,8 +62,8 @@ Create a file named:
 Add the provided GitHub OAuth credentials:
 
 ```env
-GITHUB_CLIENT_ID=provided_client_id
-GITHUB_CLIENT_SECRET=provided_client_secret
+GITHUB_CLIENT_ID=Ov23liygDInVoFiZbbEF
+GITHUB_CLIENT_SECRET=77737f52dfbaecf60612a6b2c8c765b765b4e396
 ```
 
 ---
