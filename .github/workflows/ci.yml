@@ -1,0 +1,24 @@
+name: Python CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: [self-hosted, python-agent]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Python version
+        run: python3 --version
+
+      - name: Install dependencies
+        run: pip3 install -r requirements.txt
+
+      - name: Compile Python files
+        run: python3 -m compileall .
