@@ -167,3 +167,5 @@ python3 app.py
 - GitHub REST API
 - GitHub OAuth 2.0
 - HTML/CSS
+
+echo "CI test" >> README.md
