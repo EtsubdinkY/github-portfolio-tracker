@@ -22,3 +22,6 @@ jobs:
 
       - name: Compile Python files
         run: python3 -m compileall .
+
+      - name: Build Docker image
+        run: docker build -t github-portfolio-tracker .
